@@ -29,7 +29,7 @@ export class MemberDetailComponent implements OnInit {
     this.memberService.getMember(username).subscribe({
       next: member => {
         this.member = member,
-        this.getImages()
+          this.getImages()
       }
     })
   }
@@ -37,7 +37,7 @@ export class MemberDetailComponent implements OnInit {
   getImages() {
     if (!this.member) return;
     for (const photo of this.member?.photos) {
-      this.images.push(new ImageItem({src: photo.url, thumb: photo.url}));
+      this.images.push(new ImageItem({ src: photo.url, thumb: photo.url }));
     }
   }
 
