@@ -28,4 +28,8 @@ export class MessageService {
     // content will do shortcut match!!
     return this.http.post<Message>(this.baseUrl + 'messages', { recipientUsername: username, content });
   }
+
+  deleteMessage(id: Number){
+    return this.http.delete(this.baseUrl + 'messages/' + id);
+  }
 }

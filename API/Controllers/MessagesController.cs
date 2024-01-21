@@ -51,9 +51,9 @@ public class MessagesController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedList<MessageDto>>> GetMessagesForUser([FromQuery] MessageParams  messageParams)
+    public async Task<ActionResult<PagedList<MessageDto>>> GetMessagesForUser([FromQuery] MessageParams messageParams)
     {
-         messageParams.Username = User.GetUsername();
+        messageParams.Username = User.GetUsername();
 
         var messages = await _messageRepository.GetMessagesForUser(messageParams);
 
@@ -69,4 +69,28 @@ public class MessagesController : BaseApiController
         var currentUserName = User.GetUsername();
         return Ok(await _messageRepository.GetMessageThread(currentUserName, username));
     }
- }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteMessage(int id)
+    {
+        var username = User.GetUsername();
+
+        var message = await _messageRepository.GetMessage(id);
+
+        if (message.SenderUsername != username && message.RecipientUsername != username)
+            return Unauthorized();
+
+        if (message.SenderUsername == username)
+            message.SenderDeleted = true;
+
+        if (message.RecipientUsername == username)
+            message.RecipientDeleted = true;
+
+        if (message.SenderDeleted && message.RecipientDeleted)
+            _messageRepository.DeleteMessage(message);
+
+        if (await _messageRepository.SaveAllAsync()) return Ok();
+
+        return BadRequest("Problem deleting the message");
+    }
+}
