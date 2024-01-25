@@ -46,7 +46,7 @@ public class UsersController : BaseApiController
         var currentUser = await _userRepository.GetUserByUsernameAsync(User.FindFirst(ClaimTypes.Name)?.Value);
         userParams.CurrentUsername = currentUser.UserName;
 
-        if(string.IsNullOrWhiteSpace(userParams.Gender))
+        if (string.IsNullOrWhiteSpace(userParams.Gender))
         {
             userParams.Gender = currentUser.Gender == "male" ? "female" : "male";
         }
@@ -58,8 +58,7 @@ public class UsersController : BaseApiController
 
         return Ok(users);
     }
-
-
+    
     [HttpGet("{username}")]
     public async Task<ActionResult<MemberDto>> GetUser(string username)
     {
