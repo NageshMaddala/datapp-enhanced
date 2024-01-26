@@ -75,8 +75,9 @@ public class MessageRepository : IMessageRepository
     public async Task<IEnumerable<MessageDto>> GetMessageThread(string currentUserName, string recipientUserName)
     {
         var query = _context.Messages
-            .Include(u => u.Sender).ThenInclude(p => p.Photos)
-            .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+            // when projection is used no need of eager loading related entities
+            // .Include(u => u.Sender).ThenInclude(p => p.Photos)
+            // .Include(u => u.Recipient).ThenInclude(p => p.Photos)
             .Where(
                 m => m.RecipientUsername == currentUserName && m.RecipientDeleted == false &&
                 m.SenderUsername == recipientUserName ||
