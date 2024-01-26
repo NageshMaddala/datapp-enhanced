@@ -3,6 +3,7 @@ using API.Data;
 using API.Entities;
 using API.Errors;
 using API.Extensions;
+using API.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +22,19 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionMiddleware>();
 
+// AllowCredentials cors is required for signalR
 app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod()
+    .AllowCredentials()
     .WithOrigins("https://localhost:4200"));
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// this is all required
+app.MapHub<PresenceHub>("hubs/presence");
+app.MapHub<MessageHub>("hubs/message");
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
@@ -37,6 +44,8 @@ try
     var userManager = services.GetRequiredService<UserManager<AppUser>>();
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     await context.Database.MigrateAsync();
+    // context.Connections.RemoveRange(context.Connections);
+    await context.Database.ExecuteSqlRawAsync("Delete from [Connections]");
     await Seed.SeedUsers(userManager, roleManager);
 }
 catch (Exception ex)
