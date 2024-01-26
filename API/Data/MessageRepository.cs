@@ -95,20 +95,17 @@ public class MessageRepository : IMessageRepository
             {
                 message.DateRead = DateTime.UtcNow;
             }
-            await _context.SaveChangesAsync();
+            // do not do this if you are using uow
+            // it defeats the purpose of uow
+            // await _context.SaveChangesAsync();
         }
 
-        // return await query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).ToListAsync();
-        return _mapper.Map<IEnumerable<MessageDto>>(query);
+        return await query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).ToListAsync();
+        // return _mapper.Map<IEnumerable<MessageDto>>(query);
     }
 
     public void RemoveConnection(Connection connection)
     {
         _context.Connections.Remove(connection);
-    }
-
-    public async Task<bool> SaveAllAsync()
-    {
-        return await _context.SaveChangesAsync() > 0;
     }
 }
