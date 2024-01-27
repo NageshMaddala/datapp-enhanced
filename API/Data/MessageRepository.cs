@@ -75,8 +75,9 @@ public class MessageRepository : IMessageRepository
     public async Task<IEnumerable<MessageDto>> GetMessageThread(string currentUserName, string recipientUserName)
     {
         var query = _context.Messages
-            .Include(u => u.Sender).ThenInclude(p => p.Photos)
-            .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+            // when projection is used no need of eager loading related entities
+            // .Include(u => u.Sender).ThenInclude(p => p.Photos)
+            // .Include(u => u.Recipient).ThenInclude(p => p.Photos)
             .Where(
                 m => m.RecipientUsername == currentUserName && m.RecipientDeleted == false &&
                 m.SenderUsername == recipientUserName ||
@@ -95,20 +96,17 @@ public class MessageRepository : IMessageRepository
             {
                 message.DateRead = DateTime.UtcNow;
             }
-            await _context.SaveChangesAsync();
+            // do not do this if you are using uow
+            // it defeats the purpose of uow
+            // await _context.SaveChangesAsync();
         }
 
-        // return await query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).ToListAsync();
-        return _mapper.Map<IEnumerable<MessageDto>>(query);
+        return await query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).ToListAsync();
+        // return _mapper.Map<IEnumerable<MessageDto>>(query);
     }
 
     public void RemoveConnection(Connection connection)
     {
         _context.Connections.Remove(connection);
-    }
-
-    public async Task<bool> SaveAllAsync()
-    {
-        return await _context.SaveChangesAsync() > 0;
     }
 }
