@@ -1,0 +1,9 @@
+docker run --name postgres -e POSTGRES_PASSWORD=postgrespw -p 5432:5432 -d postgres:latest
+
+Install postgressql management tool extension to interact with postgres database
+
+Update appsettings connection
+Update ApplicationServiceExtensions
+We need to create new migration (may be delete sqllite migration but that is optional)
+
+dotnet ef migrations add PostgresInitial -o Data/Migrations

@@ -30,11 +30,19 @@ app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod()
 app.UseAuthentication();
 app.UseAuthorization();
 
+// this will look for index.html
+app.UseDefaultFiles();
+// it will fish out index.html, by default it will look for wwwroot folder and serve content from there
+app.UseStaticFiles();
+
 app.MapControllers();
 
 // this is all required
 app.MapHub<PresenceHub>("hubs/presence");
 app.MapHub<MessageHub>("hubs/message");
+
+// fallback controller setup
+app.MapFallbackToController("Index", "Fallback");
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
@@ -45,7 +53,8 @@ try
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     await context.Database.MigrateAsync();
     // context.Connections.RemoveRange(context.Connections);
-    await context.Database.ExecuteSqlRawAsync("Delete from [Connections]");
+    // await context.Database.ExecuteSqlRawAsync("Delete from \"Connections\"");
+    await Seed.ClearConnections(context);
     await Seed.SeedUsers(userManager, roleManager);
 }
 catch (Exception ex)
